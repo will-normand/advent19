@@ -47,13 +47,26 @@ mod day1 {
 mod day2 {
     use std::fs;
 
-    pub fn run() {
-        let mut input = load_file("data/day2.txt".to_string());
-        input[1] = 12;
-        input[2] = 2;
+    const TARGET: i32 = 19_690_720;
 
-        let result = process(input);
-        println!("The answer is {}", result[0]);
+    pub fn run() {
+        let input = load_file("data/day2.txt".to_string());
+
+        for noun in 0..99 {
+            for verb in 0..99 {
+                let mut memory = input.clone();
+                memory[1] = noun;
+                memory[2] = verb;
+
+                let result = process(memory);
+
+                if result[0] == TARGET {
+                    let answer = 100 * noun + verb;
+                    println!("The answer is {}", answer);
+                    return;
+                }
+            }
+        }
     }
 
     fn load_file(filename: String) -> Vec<i32> {
@@ -76,8 +89,6 @@ mod day2 {
             let a: usize = memory[i + 1] as usize;
             let b: usize = memory[i + 2] as usize;
             let c: usize = memory[i + 3] as usize;
-
-            // println!("opcode {}, a {}, b {}, c {}", opcode, a, b, c);
 
             if opcode == 1 {
                 memory[c] = memory[a] + memory[b];
