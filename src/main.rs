@@ -52,7 +52,8 @@ mod day2 {
         input[1] = 12;
         input[2] = 2;
 
-        process(input);
+        let result = process(input);
+        println!("The answer is {}", result[0]);
     }
 
     fn load_file(filename: String) -> Vec<i32> {
@@ -63,7 +64,7 @@ mod day2 {
             .collect()
     }
 
-    fn process(mut memory: Vec<i32>) {
+    fn process(mut memory: Vec<i32>) -> Vec<i32> {
         let mut i = 0;
         loop {
             let opcode = memory[i];
@@ -76,7 +77,7 @@ mod day2 {
             let b: usize = memory[i + 2] as usize;
             let c: usize = memory[i + 3] as usize;
 
-            println!("opcode {}, a {}, b {}, c {}", opcode, a, b, c);
+            // println!("opcode {}, a {}, b {}, c {}", opcode, a, b, c);
 
             if opcode == 1 {
                 memory[c] = memory[a] + memory[b];
@@ -86,9 +87,7 @@ mod day2 {
 
             i += 4;
         }
-        for i in memory {
-            print!("{},", i);
-        }
-        println!();
+
+        memory
     }
 }
