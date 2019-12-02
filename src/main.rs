@@ -1,6 +1,12 @@
 fn main() {
-    let result = day1::day1();
-    println!("Day 1 result is: {}", result)
+    let day = 2;
+
+    if day == 1 {
+        let result = day1::day1();
+        println!("Day 1 result is: {}", result)
+    } else if day == 2 {
+        day2::run();
+    }
 }
 
 mod day1 {
@@ -35,5 +41,53 @@ mod day1 {
         }
 
         fuel
+    }
+}
+
+mod day2 {
+    use std::fs;
+
+    pub fn run() {
+        let mut input = load_file("data/day2.txt".to_string());
+        input[1] = 12;
+        input[2] = 2;
+
+        process(input);
+    }
+
+    fn load_file(filename: String) -> Vec<i32> {
+        let opcodes = fs::read_to_string(filename).expect("Failed to find file");
+        opcodes
+            .split(',')
+            .map(|s| s.parse::<i32>().unwrap())
+            .collect()
+    }
+
+    fn process(mut tape: Vec<i32>) {
+        let mut i = 0;
+        loop {
+            let opcode = tape[i];
+
+            if opcode == 99 {
+                break;
+            }
+
+            let a: usize = tape[i + 1] as usize;
+            let b: usize = tape[i + 2] as usize;
+            let c: usize = tape[i + 3] as usize;
+
+            println!("opcode {}, a {}, b {}, c {}", opcode, a, b, c);
+
+            if opcode == 1 {
+                tape[c] = tape[a] + tape[b];
+            } else if opcode == 2 {
+                tape[c] = tape[a] * tape[b];
+            }
+
+            i += 4;
+        }
+        for i in tape {
+            print!("{},", i);
+        }
     }
 }
