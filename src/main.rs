@@ -56,38 +56,39 @@ mod day2 {
     }
 
     fn load_file(filename: String) -> Vec<i32> {
-        let opcodes = fs::read_to_string(filename).expect("Failed to find file");
-        opcodes
+        let integers = fs::read_to_string(filename).expect("Failed to find file");
+        integers
             .split(',')
             .map(|s| s.parse::<i32>().unwrap())
             .collect()
     }
 
-    fn process(mut tape: Vec<i32>) {
+    fn process(mut memory: Vec<i32>) {
         let mut i = 0;
         loop {
-            let opcode = tape[i];
+            let opcode = memory[i];
 
             if opcode == 99 {
                 break;
             }
 
-            let a: usize = tape[i + 1] as usize;
-            let b: usize = tape[i + 2] as usize;
-            let c: usize = tape[i + 3] as usize;
+            let a: usize = memory[i + 1] as usize;
+            let b: usize = memory[i + 2] as usize;
+            let c: usize = memory[i + 3] as usize;
 
             println!("opcode {}, a {}, b {}, c {}", opcode, a, b, c);
 
             if opcode == 1 {
-                tape[c] = tape[a] + tape[b];
+                memory[c] = memory[a] + memory[b];
             } else if opcode == 2 {
-                tape[c] = tape[a] * tape[b];
+                memory[c] = memory[a] * memory[b];
             }
 
             i += 4;
         }
-        for i in tape {
+        for i in memory {
             print!("{},", i);
         }
+        println!();
     }
 }
