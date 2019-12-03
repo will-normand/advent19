@@ -160,18 +160,14 @@ mod day3 {
     fn do_move((start_x, start_y): (i32, i32), current_move: &Move) -> Vec<(i32, i32)> {
         match current_move {
             Move::U(dy) => (start_y..start_y + dy).map(|y| (start_x, y + 1)).collect(),
-            Move::D(dy) => {
-                let mut moves: Vec<(i32, i32)> =
-                    (start_y - dy..start_y).map(|y| (start_x, y)).collect();
-                moves.reverse();
-                moves
-            }
-            Move::L(dx) => {
-                let mut moves: Vec<(i32, i32)> =
-                    (start_x - dx..start_x).map(|x| (x, start_y)).collect();
-                moves.reverse();
-                moves
-            }
+            Move::D(dy) => (start_y - dy..start_y)
+                .rev()
+                .map(|y| (start_x, y))
+                .collect(),
+            Move::L(dx) => (start_x - dx..start_x)
+                .rev()
+                .map(|x| (x, start_y))
+                .collect(),
             Move::R(dx) => (start_x..start_x + dx).map(|x| (x + 1, start_y)).collect(),
         }
     }
@@ -179,7 +175,7 @@ mod day3 {
     fn wire(moves: &[Move]) -> Vec<(i32, i32)> {
         // moves.iter().flat_map(|m| do_move(m, current_move: &Move))
         let mut pos = (0, 0);
-        let mut wire = Vec::<(i32, i32)>::new(); //vec![pos];
+        let mut wire = Vec::<(i32, i32)>::new();
 
         for m in moves {
             let mut next_bit = do_move(pos, &m);
@@ -193,7 +189,6 @@ mod day3 {
         let set1: HashSet<(i32, i32)> = wire1.into_iter().collect();
         let set2: HashSet<(i32, i32)> = wire2.into_iter().collect();
         let common_points = set1.intersection(&set2);
-        println!("Common_points are {:?}", common_points);
         let mut distances: Vec<i32> = common_points.map(|p| manhattan_distance(*p)).collect();
         distances.sort();
         println!("Distances are {:?}", distances);
