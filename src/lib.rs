@@ -130,7 +130,9 @@ mod day2 {
 }
 
 mod day3 {
+    use std::collections::HashMap;
     use std::collections::HashSet;
+    use std::convert::TryInto;
     use std::fs;
 
     #[derive(Debug)]
@@ -142,10 +144,16 @@ mod day3 {
     }
 
     pub fn run() {
+        let part = 2;
         let moves = read_file(String::from("data/day3.txt"));
         let wire0 = wire(&moves[0]);
         let wire1 = wire(&moves[1]);
-        let answer = min_distance(wire0, wire1);
+        let answer: i32;
+        if part == 1 {
+            answer = min_distance(wire0, wire1);
+        } else {
+            answer = min_delay(wire0, wire1);
+        };
         println!("The answer is {}", answer);
     }
 
@@ -196,6 +204,29 @@ mod day3 {
         x.abs() + y.abs()
     }
 
+    fn min_delay(wire1: Vec<(i32, i32)>, wire2: Vec<(i32, i32)>) -> i32 {
+        let mut map1: HashMap<(i32, i32), i32> = HashMap::new();
+        let mut map2: HashMap<(i32, i32), i32> = HashMap::new();
+        let mut both: HashMap<(i32, i32), i32> = HashMap::new();
+
+        // We've excluded (0,0) from the wires, so need to add 1 to get the correct length.
+        for (i, pos) in wire1.iter().enumerate() {
+            map1.entry(*pos)
+                .or_insert_with(|| (i + 1).try_into().unwrap());
+        }
+        for (i, pos) in wire2.iter().enumerate() {
+            map2.entry(*pos)
+                .or_insert_with(|| (i + 1).try_into().unwrap());
+        }
+        for (k, v) in map1 {
+            if let Some(v2) = map2.get(&k) {
+                both.insert(k, v + v2);
+            }
+        }
+
+        *both.values().min().unwrap()
+    }
+
     fn move_from_sting(move_str: &str) -> Move {
         let m = move_str.as_bytes().first().unwrap();
         let dist = move_str[1..].parse::<i32>().unwrap();
@@ -214,7 +245,11 @@ mod day3 {
 
     fn read_file(filename: String) -> Vec<Vec<Move>> {
         let contents = fs::read_to_string(filename).expect("Failed to find file");
-        contents
+        parse_moves(&contents)
+    }
+
+    fn parse_moves(moves: &str) -> Vec<Vec<Move>> {
+        moves
             .trim_end()
             .split('\n')
             .map(|wire_str| {
@@ -259,6 +294,17 @@ mod day3 {
             let m1 = vec![R(8), U(5), L(5), D(3)];
             let m2 = vec![U(7), R(6), D(4), L(4)];
             assert_eq!(6, min_distance(wire(&m1), wire(&m2)));
+        }
+
+        #[test]
+        fn example_delays() {
+            let moves = parse_moves(&String::from(
+                "R75,D30,R83,U83,L12,D49,R71,U7,L72\nU62,R66,U55,R34,D71,R55,D58,R83",
+            ));
+            let wire0 = wire(&moves[0]);
+            let wire1 = wire(&moves[1]);
+
+            assert_eq!(610, min_delay(wire0, wire1));
         }
     }
 }
