@@ -442,6 +442,8 @@ mod day6 {
     pub fn run() {
         let orbits = load_orbits(utils::read_file_to_string("data/day6.txt".to_string()));
         let data_map = make_map(orbits);
+        let orbit_count = count_orbits(&data_map);
+        println!("The answer is {}", orbit_count);
     }
 
     fn load_orbits(orbits_string: String) -> Vec<(String, String)> {
@@ -456,7 +458,7 @@ mod day6 {
 
     fn make_map(raw_orbits: Vec<(String, String)>) -> HashMap<String, Rc<Orbit>> {
         let mut orbits: HashMap<String, Rc<Orbit>> = HashMap::new();
-        
+
         orbits.insert(
             "COM".to_string(),
             Rc::new(Orbit {
@@ -465,30 +467,30 @@ mod day6 {
             }),
         );
 
-        for (orbit_name, name) in &raw_orbits {
-            match orbits.get(orbit_name) {
-                Some(existing_orbit) => {
-                    println!("Found {} in the map - making {} orbit it", orbit_name, name);
-                    let new_orbit = Orbit {
-                        object: name.to_string(),
-                        orbits: Some(Rc::clone(&existing_orbit)),
-                    };
-                    orbits.insert(name.to_string(), Rc::new(new_orbit));
-                }
-                None => {
-                    panic!("Object is not from this universe: {} should orbit {}, but {} does not exist", name, orbit_name, orbit_name);
-                    // println!("Did not find {} in the map - making {} orbit nothing", orbit_name, name);
-                    // orbits.insert(
-                    //     name.to_string(),
-                    //     Rc::new(Orbit {
-                    //         object: name.to_string(),
-                    //         orbits: None,
-                    //     }),
-                    // );
+        let mut missing_orbits: Vec<(String, String)> = Vec::new();
+        let mut attempting_orbits: Vec<(String, String)> = raw_orbits;
+
+        while !attempting_orbits.is_empty() {
+            for (orbit_name, name) in &attempting_orbits {
+                match orbits.get(orbit_name) {
+                    Some(existing_orbit) => {
+                        println!("Found {} in the map - making {} orbit it", orbit_name, name);
+                        let new_orbit = Orbit {
+                            object: name.to_string(),
+                            orbits: Some(Rc::clone(&existing_orbit)),
+                        };
+                        orbits.insert(name.to_string(), Rc::new(new_orbit));
+                    }
+                    None => {
+                        println!("Object is not from this universe: {} should orbit {}, but {} does not exist", name, orbit_name, orbit_name);
+                        missing_orbits.push((orbit_name.to_string(), name.to_string()));
+                    }
                 }
             }
-        }
 
+            attempting_orbits = missing_orbits.clone();
+            missing_orbits.clear();
+        }
         orbits
     }
 
