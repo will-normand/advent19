@@ -443,7 +443,14 @@ mod day6 {
         let orbits = load_orbits(utils::read_file_to_string("data/day6.txt".to_string()));
         let data_map = make_map(orbits);
         let orbit_count = count_orbits(&data_map);
-        println!("The answer is {}", orbit_count);
+        let you = orbits_as_list("YOU".to_string(), &data_map);
+        let san = orbits_as_list("SAN".to_string(), &data_map);
+        let transfers = intersection_distance(&you, &san);
+
+        println!(
+            "The orbit count is {}, transfers is {}",
+            orbit_count, transfers
+        );
     }
 
     fn load_orbits(orbits_string: String) -> Vec<(String, String)> {
@@ -474,7 +481,6 @@ mod day6 {
             for (orbit_name, name) in &attempting_orbits {
                 match orbits.get(orbit_name) {
                     Some(existing_orbit) => {
-                        println!("Found {} in the map - making {} orbit it", orbit_name, name);
                         let new_orbit = Orbit {
                             object: name.to_string(),
                             orbits: Some(Rc::clone(&existing_orbit)),
@@ -482,7 +488,6 @@ mod day6 {
                         orbits.insert(name.to_string(), Rc::new(new_orbit));
                     }
                     None => {
-                        println!("Object is not from this universe: {} should orbit {}, but {} does not exist", name, orbit_name, orbit_name);
                         missing_orbits.push((orbit_name.to_string(), name.to_string()));
                     }
                 }
@@ -512,6 +517,36 @@ mod day6 {
             .keys()
             .map(|k| count_indirect_orbits(k.to_string(), &map_data))
             .sum()
+    }
+
+    fn orbits_as_list(object_name: String, map_data: &HashMap<String, Rc<Orbit>>) -> Vec<String> {
+        let mut orbit_list = Vec::new();
+        let object: &Rc<Orbit> = &map_data[&object_name];
+
+        let mut orbit = object.orbits.clone();
+
+        while orbit.is_some() {
+            let current = orbit.unwrap();
+            let name: String = current.object.clone().to_string();
+            orbit_list.push(name);
+            orbit = current.orbits.clone();
+        }
+
+        orbit_list
+    }
+
+    fn intersection_distance(you: &[String], san: &[String]) -> u32 {
+        let mut min = u32::max_value();
+
+        for (yi, y) in you.iter().enumerate() {
+            if let Some(si) = san.iter().position(|s| s == y) {
+                let distance = (si + yi) as u32;
+                if distance < min {
+                    min = distance;
+                }
+            }
+        }
+        min
     }
 
     #[cfg(test)]
@@ -606,6 +641,30 @@ K)L";
 
             let actual = count_orbits(&make_map(load_orbits(input.to_string())));
             assert_eq!(42, actual);
+        }
+
+        #[test]
+        fn distance_example() {
+            let input = "COM)B
+B)C
+C)D
+D)E
+E)F
+B)G
+G)H
+D)I
+E)J
+J)K
+K)L
+K)YOU
+I)SAN";
+
+            let data_map = make_map(load_orbits(input.to_string()));
+            let you = orbits_as_list("YOU".to_string(), &data_map);
+            let san = orbits_as_list("SAN".to_string(), &data_map);
+            let actual = intersection_distance(&you, &san);
+            println!("{:?}", actual);
+            assert_eq!(4, actual);
         }
     }
 }
