@@ -3,6 +3,7 @@ mod day2;
 mod day3;
 mod day4;
 mod day6;
+mod day8;
 
 pub fn run(day: u32) {
     if day == 1 {
@@ -16,6 +17,8 @@ pub fn run(day: u32) {
         day4::run();
     } else if day == 6 {
         day6::run();
+    } else if day == 8 {
+        day8::run();
     }
 }
 

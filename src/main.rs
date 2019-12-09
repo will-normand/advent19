@@ -1,5 +1,5 @@
 fn main() {
-    let day = 6;
+    let day = 8;
 
     advent19::run(day);
 }
